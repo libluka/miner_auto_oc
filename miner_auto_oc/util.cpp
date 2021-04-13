@@ -11,11 +11,11 @@ bool execute_application(std::string path, std::string args) {
 	LPCSTR lpath = path.c_str();
 
 	std::string args_temp = path + " " + args;
-	LPSTR  largs = const_cast<char*>(args_temp.c_str());
+	LPSTR largs = const_cast<char*>(args_temp.c_str());
 
-	memset(&startup_info, 0, sizeof(startup_info));
-	memset(&process_information, 0, sizeof(process_information));
-	startup_info.cb = sizeof(startup_info);
+	ZeroMemory(&startup_info,		 sizeof(STARTUPINFOA));
+	ZeroMemory(&process_information, sizeof(PROCESS_INFORMATION));
+	startup_info.cb = sizeof(STARTUPINFOA);
 
 	BOOL result = CreateProcessA(
 		lpath,
@@ -23,7 +23,7 @@ bool execute_application(std::string path, std::string args) {
 		0,
 		0,
 		FALSE,
-		DETACHED_PROCESS,
+		CREATE_NEW_CONSOLE,
 		0,
 		0,
 		&startup_info,
@@ -45,7 +45,7 @@ bool in_bound(int num, int min_bound, int max_bound) {
 	return !(num < min_bound || num > max_bound);
 }
 
-bool file_exists(std::string& path) {
+bool file_exists(std::string path) {
 	LPCSTR path_l = path.c_str();
 
 	if (GetFileAttributesA(path_l) == 0xFFFFFFFF) {
@@ -55,15 +55,26 @@ bool file_exists(std::string& path) {
 	return true;
 }
 
-DWORD get_process_id(std::string& p_name) {
+DWORD get_process_id_by_path(std::string path) {
 	PROCESSENTRY32 entry;
 	entry.dwSize = sizeof(PROCESSENTRY32);
 
-	HANDLE list_snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, NULL);;
+	HANDLE list_snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, NULL);
+
+	std::string base_filename = path.substr(path.find_last_of("/\\") + 1);
+	std::wstring base_filename_w = std::wstring(base_filename.begin(), base_filename.end());
+	
 
 	Process32First(list_snapshot, &entry);
 	do {
-		if(entry.szExeFile)
+		if (wcscmp(entry.szExeFile, base_filename_w.c_str()) == 0) {
+			CloseHandle(list_snapshot);
 
-	} while (Process32Next(list_snapshot, &entry))
+			return entry.th32ProcessID;
+		}
+
+	} while (Process32Next(list_snapshot, &entry));
+	
+	CloseHandle(list_snapshot);
+	return 0;
 }
