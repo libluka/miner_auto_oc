@@ -108,7 +108,7 @@
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
     </Link>
   </ItemDefinitionGroup>
@@ -148,6 +148,12 @@
   <ItemGroup>
     <ClInclude Include="getopt.h" />
     <ClInclude Include="util.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="images\arguments.png" />
+    <Image Include="images\create_shortcut.png" />
+    <Image Include="images\quotation_marks_1.png" />
+    <Image Include="images\quotation_marks_2.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

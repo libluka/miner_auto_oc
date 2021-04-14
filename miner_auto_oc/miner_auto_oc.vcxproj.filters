@@ -33,4 +33,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="images\arguments.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="images\create_shortcut.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="images\quotation_marks_1.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="images\quotation_marks_2.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
 </Project>
