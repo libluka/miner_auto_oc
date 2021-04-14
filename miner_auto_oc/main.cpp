@@ -1,58 +1,61 @@
 #include <iostream>
 #include <Windows.h>
 
+#include "getopt.h"
 #include "util.hpp"
 
 #define MIN_PROFILE_NUM 1
 #define MAX_PROFILE_NUM 5
 
-const std::string __usage = "\nUsage: miner_auto_oc [-e] [-al] [-os] [-ot]\n\n"
+const std::string __usage = "\nUsage: miner_auto_oc [-e] [-a] [-o] [-c]\n\n"
 "Options:\n"
+"         -h       Shows this help page.\n"
 "         -e       The path to the intended executable to be run (usually the miner).\n"
-"         -al      The path to your afterburner executable.\n"
-"         -os      The profile number you want active while the miner is active.     Must be between 1 & 5.\n"
-"         -ot      The profile number you want reverted to when the miner is closed. Must be between 1 & 5.\n";
+"         -a       The path to your afterburner executable.\n"
+"         -o       The profile number you want active on open (while the miner is active). Must be between 1 & 5.\n"
+"         -c       The profile number you want reverted to when the miner is closed.       Must be between 1 & 5.\n";
 
-int main(int argc, char* argv[])
+int main(int argc, char** argv)
 {
+    if (argc == 1) {
+        std::cerr << "\nType miner_auto_oc [-h] for help.\n";
+        return -1;
+    }
+
     std::string miner_path = "", afterburner_path = "";
     int profile_active = 0, profile_close = 0;
 
     DWORD miner_process_id = 0;
 
-    for (int i = 1; i < argc; ++i) {
-        std::string arg = argv[i];
-
-        if (arg.find("-") == std::string::npos && i + 1 == argc) {
+    int index;
+    while ((index = getopt_a(argc, argv, "e:a:o:c:h")) != -1) {
+        switch (index) {
+        case 'e':
+            miner_path = optarg_a;
             break;
-        }
-        else if (arg.find("-") != std::string::npos
-            && i == argc - 1) {
 
+        case 'a':
+            afterburner_path = optarg_a;
+            break;
+
+        case 'o':
+            profile_active = std::stoi(optarg_a);
+            break;
+
+        case 'c':
+            profile_close = std::stoi(optarg_a);
+            break;
+
+        case 'h':
             std::cerr << __usage;
             return -1;
         }
-
-        if (arg == "-e") {
-            miner_path = argv[i + 1];
-        }
-        else if (arg == "-al") {
-            afterburner_path = argv[i + 1];
-        }
-        else if (arg == "-os") {
-            profile_active = std::stoi(argv[i + 1]);
-        }
-         else if (arg == "-ot") {
-            profile_close = std::stoi(argv[i + 1]);
-        }
     }
 
-    if(afterburner_path == ""
-        || miner_path == ""
-        || !in_bound(profile_active, MIN_PROFILE_NUM, MAX_PROFILE_NUM)
+    if(!in_bound(profile_active, MIN_PROFILE_NUM, MAX_PROFILE_NUM)
         || !in_bound(profile_close,  MIN_PROFILE_NUM, MAX_PROFILE_NUM)) {
 
-        std::cout << __usage;
+        std::cerr << "\nOut of bound profile number!\n";
         return -1;
 
     }
@@ -65,7 +68,7 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    std::cout << "Executing specified executable (" << miner_path << ")\n";
+    std::cout << "\nExecuting specified executable (" << miner_path << ")\n";
     execute_application(miner_path, "");
 
     miner_process_id = get_process_id_by_path(miner_path);
